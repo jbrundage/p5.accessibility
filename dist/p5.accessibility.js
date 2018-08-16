@@ -1270,7 +1270,9 @@ Registry.register(FillEntity);;function ShapeEntity(Interceptor, shapeObject, ar
   /* global BaseEntity */
   BaseEntity.call(self, shapeObject, arguments, canvasX, canvasY);
   this.areaAbs = 0;
+
   this.currentEllipseMode = Interceptor.currentEllipseMode;
+
   this.type = Interceptor.currentColor + ` ` + shapeObject.name;
   this.area = 0;
 
@@ -1325,6 +1327,7 @@ Registry.register(FillEntity);;function ShapeEntity(Interceptor, shapeObject, ar
       } else if(!this.currentEllipseMode.localeCompare(`corners`)) {
         objectArea = 3.14 * abs(arguments[2] - arguments[0]) * (arguments[3] - arguments[1]) / 4;
       }
+
     } else if (!objectType.localeCompare(`line`)) {
       objectArea = 0;
     } else if (!objectType.localeCompare(`point`)) {
@@ -1365,8 +1368,10 @@ ShapeEntity.handles = function(name) {
 ShapeEntity.isParameter = false;
 
 /* global Registry */
+
 Registry.register(ShapeEntity);
 ;function TextEntity(Interceptor, shapeObject, arguments, canvasX, canvasY) {
+
   const self = this;
   /* global BaseEntity */
   BaseEntity.call(self, shapeObject, arguments, canvasX, canvasY);
@@ -1399,6 +1404,7 @@ TextEntity.handles = function(name) {
 TextEntity.isParameter = false;
 
 /* global Registry */
+
 Registry.register(TextEntity);;function EllipseModeEntity(Interceptor, arguments) {
   const mode = arguments[0];
   this.populate = function(Interceptor) {
@@ -1420,6 +1426,7 @@ EllipseModeEntity.isParameter = true;
 /* global Registry */
 Registry.register(EllipseModeEntity);
 ;function TextInterceptor() { // eslint-disable-line
+
   const self = this;
   /* global baseInterceptor */
   baseInterceptor.call(self);
