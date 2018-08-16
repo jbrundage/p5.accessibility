@@ -875,6 +875,7 @@ Object.defineProperty(Array.prototype, `equals`, {
   this.prevTotalCount = 0,
   this.totalCount = 0,
   this.currentColor = `white`,
+  this.currentEllipseMode = `center`,
   this.bgColor = `white`,
   this.objectArea = 0,
   this.coordinates = [],
@@ -1123,7 +1124,8 @@ function RGBString(arguments) {
     values = [parseInt(values[0]), parseInt(values[1]), parseInt(values[2])];
     return (getRGBname(values));
   }
-};function BaseEntity(Interceptor, object) {
+}
+;function BaseEntity(Interceptor, object) {
   this.type = Interceptor.currentColor + ` ` + object.name,
   this.location = ``,
   this.coordinates = ``,
@@ -1150,10 +1152,10 @@ function RGBString(arguments) {
       const a = argument;
       if (object.params[i].description.indexOf(`x-coordinate`) > -1) {
         xCoord = a;
-        that.coordinates += Math.round(a) + `x,`;
+        that.coordinates += a + `x,`;
       } else if (object.params[i].description.indexOf(`y-coordinate`) > -1) {
         yCoord = a;
-        that.coordinates += Math.round(a) + `y`;
+        that.coordinates += a + `y`;
       }
       i++;
     });
@@ -1268,6 +1270,9 @@ Registry.register(FillEntity);;function ShapeEntity(Interceptor, shapeObject, ar
   /* global BaseEntity */
   BaseEntity.call(self, shapeObject, arguments, canvasX, canvasY);
   this.areaAbs = 0;
+
+  this.currentEllipseMode = Interceptor.currentEllipseMode;
+
   this.type = Interceptor.currentColor + ` ` + shapeObject.name;
   this.area = 0;
 
@@ -1313,7 +1318,16 @@ Registry.register(FillEntity);;function ShapeEntity(Interceptor, shapeObject, ar
         }
       }
     } else if (!objectType.localeCompare(`ellipse`)) {
-      objectArea = 3.14 * arguments[2] * arguments[3] / 4;
+      if(!this.currentEllipseMode.localeCompare(`center`)) {
+        objectArea = 3.14 * arguments[2] * arguments[3] / 4;
+      } else if(!this.currentEllipseMode.localeCompare(`radius`)) {
+        objectArea = 3.14 * arguments[2] * arguments[3];
+      } else if(!this.currentEllipseMode.localeCompare(`corner`)) {
+        objectArea = 3.14 * arguments[2] * arguments[3] / 4;
+      } else if(!this.currentEllipseMode.localeCompare(`corners`)) {
+        objectArea = 3.14 * abs(arguments[2] - arguments[0]) * (arguments[3] - arguments[1]) / 4;
+      }
+
     } else if (!objectType.localeCompare(`line`)) {
       objectArea = 0;
     } else if (!objectType.localeCompare(`point`)) {
@@ -1354,7 +1368,10 @@ ShapeEntity.handles = function(name) {
 ShapeEntity.isParameter = false;
 
 /* global Registry */
-Registry.register(ShapeEntity);;function TextEntity(Interceptor, shapeObject, arguments, canvasX, canvasY) {
+
+Registry.register(ShapeEntity);
+;function TextEntity(Interceptor, shapeObject, arguments, canvasX, canvasY) {
+
   const self = this;
   /* global BaseEntity */
   BaseEntity.call(self, shapeObject, arguments, canvasX, canvasY);
@@ -1387,7 +1404,29 @@ TextEntity.handles = function(name) {
 TextEntity.isParameter = false;
 
 /* global Registry */
-Registry.register(TextEntity);;function TextInterceptor() { // eslint-disable-line
+
+Registry.register(TextEntity);;function EllipseModeEntity(Interceptor, arguments) {
+  const mode = arguments[0];
+  this.populate = function(Interceptor) {
+    Interceptor.currentEllipseMode = mode;
+  }
+  this.populate(Interceptor);
+}
+
+EllipseModeEntity.handledNames = [
+  `ellipseMode`
+]
+
+EllipseModeEntity.handles = function(name) {
+  return (this.handledNames.indexOf(name) >= 0);
+}
+
+EllipseModeEntity.isParameter = true;
+
+/* global Registry */
+Registry.register(EllipseModeEntity);
+;function TextInterceptor() { // eslint-disable-line
+
   const self = this;
   /* global baseInterceptor */
   baseInterceptor.call(self);
